@@ -17,11 +17,12 @@ namespace StrixIT.Platform.Modules.Logging.Tests
         [TestInitialize]
         public void Init()
         {
-            ModuleManager.LoadConfigurations();
+            StrixPlatform.Environment = new DefaultEnvironment();
             StrixPlatform.ApplicationId = Guid.NewGuid();
             var userContext = new Mock<IUserContext>();
             userContext.Setup(u => u.GroupId).Returns(Guid.NewGuid());
             StrixPlatform.User = userContext.Object;
+            ModuleManager.LoadConfigurations();
         }
 
         [TestCleanup]
