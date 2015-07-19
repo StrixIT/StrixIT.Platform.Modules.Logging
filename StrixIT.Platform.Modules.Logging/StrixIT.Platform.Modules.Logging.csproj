@@ -134,7 +134,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y /E /F /I "$(TargetPath)" "$(TargetPath)\..\..\..\..\StrixIT.Platform.Modules.Logging.WebClient\Areas\Logging\bin"
+    <PostBuildEvent>xcopy /Y /E /F /I "$(TargetPath)\..\..\..\Migrations\Scripts\*.*" "c:\builds\Modules\Logging\SQL Scripts\"
+xcopy /Y /E /F /I "$(TargetPath)" "$(TargetPath)\..\..\..\..\StrixIT.Platform.Modules.Logging.WebClient\Areas\Logging\bin"
 xcopy /Y /E /F /I "$(TargetPath)\..\log4net.dll" "$(TargetPath)\..\..\..\..\StrixIT.Platform.Modules.Logging.WebClient\Areas\Logging\bin"
 xcopy /Y /E /F /I "$(TargetPath)\..\nl\StrixIT.Platform.Modules.Logging.resources.dll" "$(TargetPath)\..\..\..\..\StrixIT.Platform.Modules.Logging.WebClient\Areas\Logging\bin\nl"</PostBuildEvent>
   </PropertyGroup>
