@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="AnalyticsService.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,7 +17,8 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
+
+#endregion Apache License
 
 using System.Linq;
 
@@ -24,16 +26,28 @@ namespace StrixIT.Platform.Modules.Logging
 {
     public class AnalyticsService
     {
+        #region Private Fields
+
         private ILoggingDataSource _source;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public AnalyticsService(ILoggingDataSource source)
         {
             this._source = source;
         }
 
+        #endregion Public Constructors
+
+        #region Public Methods
+
         public IQueryable<AnalyticsLogEntry> Analytics()
         {
             return this._source.AnalyticsLogQuery();
         }
+
+        #endregion Public Methods
     }
 }

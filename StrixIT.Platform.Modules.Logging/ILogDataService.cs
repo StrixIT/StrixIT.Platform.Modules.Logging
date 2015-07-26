@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="ILogDataService.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,21 +17,26 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
-using System.Collections.Generic;
+#endregion Apache License
+
 using StrixIT.Platform.Core;
+using System.Collections.Generic;
 
 namespace StrixIT.Platform.Modules.Logging
 {
     public interface ILogDataService
     {
-        IList<ErrorLogListModel> ErrorLogEntries(FilterOptions filter);
+        #region Public Methods
 
         IList<AuditLogListModel> AuditLogEntries(FilterOptions filter);
 
-        ErrorLogEntry GetErrorLogEntry(long id);
+        IList<ErrorLogListModel> ErrorLogEntries(FilterOptions filter);
 
         AuditLogEntry GetAuditLogEntry(long id);
+
+        ErrorLogEntry GetErrorLogEntry(long id);
+
+        #endregion Public Methods
     }
 }

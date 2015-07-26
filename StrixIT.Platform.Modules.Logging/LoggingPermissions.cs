@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="LoggingPermissions.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,14 +17,19 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
+
+#endregion Apache License
 
 namespace StrixIT.Platform.Modules.Logging
 {
     public static class LoggingPermissions
     {
-        public const string ViewErrorLog = "StrixIT.Logging.ViewErrorLog";
-        public const string ViewAuditLog = "StrixIT.Logging.ViewAuditLog";
+        #region Public Fields
+
         public const string ClearErrorLog = "StrixIT.Logging.ClearErrorLog";
+        public const string ViewAuditLog = "StrixIT.Logging.ViewAuditLog";
+        public const string ViewErrorLog = "StrixIT.Logging.ViewErrorLog";
+
+        #endregion Public Fields
     }
 }

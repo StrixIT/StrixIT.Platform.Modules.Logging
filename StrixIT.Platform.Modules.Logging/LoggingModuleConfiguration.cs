@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="LoggingModuleConfiguration.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,25 +17,23 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
-using System.Collections.Generic;
+#endregion Apache License
+
 using StrixIT.Platform.Core;
-using StrixIT.Platform.Web;
+using System.Collections.Generic;
 
 namespace StrixIT.Platform.Modules.Logging
 {
     public class LoggingModuleConfiguration : IModuleConfiguration
     {
+        #region Private Fields
+
         private static bool _membershipPresent = DependencyInjector.TryGet<IMembershipService>() != null;
 
-        public string Name
-        {
-            get
-            {
-                return LoggingConstants.LOGGING;
-            }
-        }
+        #endregion Private Fields
+
+        #region Public Properties
 
         public IList<ModuleLink> ModuleLinks
         {
@@ -70,5 +69,15 @@ namespace StrixIT.Platform.Modules.Logging
                 return dictionary;
             }
         }
+
+        public string Name
+        {
+            get
+            {
+                return LoggingConstants.LOGGING;
+            }
+        }
+
+        #endregion Public Properties
     }
 }

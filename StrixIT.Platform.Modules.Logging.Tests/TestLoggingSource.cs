@@ -9,9 +9,13 @@ namespace StrixIT.Platform.Modules.Logging.Tests
 {
     public class TestLoggingSource : LoggingDataSource
     {
+        #region Public Constructors
+
         public TestLoggingSource()
         {
             Database.SetInitializer<TestLoggingSource>(new TestLoggingSourceInitializer());
         }
+
+        #endregion Public Constructors
     }
 }

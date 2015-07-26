@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="ErrorLogController.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,23 +17,44 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
-using System;
-using System.Web.Mvc;
+#endregion Apache License
+
 using StrixIT.Platform.Core;
 using StrixIT.Platform.Web;
+using System.Web.Mvc;
 
 namespace StrixIT.Platform.Modules.Logging
 {
     [StrixAuthorization(Permissions = LoggingPermissions.ViewErrorLog)]
     public class ErrorLogController : BaseController
     {
+        #region Private Fields
+
         private ILogDataService _dataService;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public ErrorLogController(ILogDataService dataService)
         {
             this._dataService = dataService;
+        }
+
+        #endregion Public Constructors
+
+        #region Public Methods
+
+        public ActionResult Details()
+        {
+            return this.View();
+        }
+
+        [HttpPost]
+        public JsonResult Get(long id)
+        {
+            return this.Json(this._dataService.GetErrorLogEntry(id));
         }
 
         public ActionResult Index()
@@ -52,17 +74,6 @@ namespace StrixIT.Platform.Modules.Logging
             return this.Json(entries.DataRecords(options));
         }
 
-        public ActionResult Details()
-        {
-            return this.View();
-        }
-
-        [HttpPost]
-        public JsonResult Get(long id)
-        {
-            return this.Json(this._dataService.GetErrorLogEntry(id));
-        }
-
         [HttpPost]
         [ValidateInput(false)]
         [AllowAnonymous]
@@ -72,5 +83,7 @@ namespace StrixIT.Platform.Modules.Logging
             var exception = new JavaScriptException(message);
             Logger.Log(exception.Message, exception, LogLevel.Error);
         }
+
+        #endregion Public Methods
     }
 }

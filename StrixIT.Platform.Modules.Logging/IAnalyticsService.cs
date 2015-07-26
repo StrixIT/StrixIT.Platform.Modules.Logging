@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="IAnalyticsService.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,7 +17,8 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
+
+#endregion Apache License
 
 using System.Linq;
 
@@ -27,10 +29,14 @@ namespace StrixIT.Platform.Modules.Logging
     /// </summary>
     public interface IAnalyticsService
     {
+        #region Public Methods
+
         /// <summary>
         /// Gets a query for the platform analytics log.
         /// </summary>
         /// <returns>The query for the analytics log</returns>
         IQueryable<AnalyticsLogEntry> Analytics();
+
+        #endregion Public Methods
     }
 }

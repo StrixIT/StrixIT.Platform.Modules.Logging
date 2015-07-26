@@ -14,6 +14,8 @@ namespace StrixIT.Platform.Modules.Logging.Tests
     [TestClass]
     public class DatabaseLoggingTests
     {
+        #region Public Methods
+
         [TestInitialize]
         public void Init()
         {
@@ -33,14 +35,14 @@ namespace StrixIT.Platform.Modules.Logging.Tests
         }
 
         [TestMethod]
-        public void WritingAnErrorMessageToTheDatabaseShouldStoreAnErrorMessage()
+        public void WritingAnAnalyticsMessageToTheDatabaseShouldStoreAnAnalyticsMessage()
         {
             using (var source = new TestLoggingSource())
             {
-                var before = source.ErrorLogQuery().Count();
+                var before = source.AnalyticsLogQuery().Count();
                 var loggingService = new LoggingService(source);
-                loggingService.Log("Test", LogLevel.Error);
-                var after = source.ErrorLogQuery().Count();
+                loggingService.LogToAnalytics("Test", "AnalyticsTest");
+                var after = source.AnalyticsLogQuery().Count();
                 Assert.IsTrue(after == before + 1);
             }
         }
@@ -59,16 +61,18 @@ namespace StrixIT.Platform.Modules.Logging.Tests
         }
 
         [TestMethod]
-        public void WritingAnAnalyticsMessageToTheDatabaseShouldStoreAnAnalyticsMessage()
+        public void WritingAnErrorMessageToTheDatabaseShouldStoreAnErrorMessage()
         {
             using (var source = new TestLoggingSource())
             {
-                var before = source.AnalyticsLogQuery().Count();
+                var before = source.ErrorLogQuery().Count();
                 var loggingService = new LoggingService(source);
-                loggingService.LogToAnalytics("Test", "AnalyticsTest");
-                var after = source.AnalyticsLogQuery().Count();
+                loggingService.Log("Test", LogLevel.Error);
+                var after = source.ErrorLogQuery().Count();
                 Assert.IsTrue(after == before + 1);
             }
         }
+
+        #endregion Public Methods
     }
 }

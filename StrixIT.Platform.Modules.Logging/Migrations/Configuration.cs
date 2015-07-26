@@ -5,20 +5,25 @@
 ////------------------------------------------------------------------------------
 namespace StrixIT.Platform.Modules.Logging.Migrations
 {
-    using System;
-    using System.Data.Entity;
     using System.Data.Entity.Migrations;
-    using System.Linq;
 
     internal sealed class Configuration : DbMigrationsConfiguration<StrixIT.Platform.Modules.Logging.LoggingDataSource>
     {
+        #region Public Constructors
+
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
+        #endregion Public Constructors
+
+        #region Protected Methods
+
         protected override void Seed(StrixIT.Platform.Modules.Logging.LoggingDataSource context)
         {
         }
+
+        #endregion Protected Methods
     }
 }

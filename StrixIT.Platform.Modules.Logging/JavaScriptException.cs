@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="JavaScriptException.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,7 +17,8 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
+
+#endregion Apache License
 
 using System;
 
@@ -25,7 +27,15 @@ namespace StrixIT.Platform.Modules.Logging
     [Serializable]
     public class JavaScriptException : Exception
     {
-        public JavaScriptException(string message) : base(message) { }
+        #region Public Constructors
+
+        public JavaScriptException(string message) : base(message)
+        {
+        }
+
+        #endregion Public Constructors
+
+        #region Public Methods
 
         public string GetMessage()
         {
@@ -33,5 +43,7 @@ namespace StrixIT.Platform.Modules.Logging
             var messageEnd = message.Contains("At url: ") ? message.IndexOf("At url: ") : message.Length;
             return message.Substring(0, messageEnd);
         }
+
+        #endregion Public Methods
     }
 }

@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="ErrorLogEntry.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,45 +17,57 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
+#endregion Apache License
+
+using StrixIT.Platform.Core;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
-using StrixIT.Platform.Core;
 
 namespace StrixIT.Platform.Modules.Logging
 {
     public class ErrorLogEntry
     {
-        public long Id { get; set; }
-
-        [StringLength(100)]
-        public string ExceptionType { get; set; }
+        #region Public Properties
 
         [StrixNotDefault]
         public Guid ApplicationId { get; set; }
 
-        [StringLength(250)]
-        public string UserEmail { get; set; }
+        [StringLength(50)]
+        public string ContentType { get; set; }
 
-        [StrixNotDefault]
-        public DateTime LogDateTime { get; set; }
+        [StringLength(1000)]
+        public string Cookies { get; set; }
+
+        [StringLength(4000)]
+        public string Exception { get; set; }
+
+        [StringLength(100)]
+        public string ExceptionType { get; set; }
+
+        [StringLength(1000)]
+        public string Headers { get; set; }
+
+        public long Id { get; set; }
+
+        [StringLength(40)]
+        public string IPAddress { get; set; }
 
         [StringLength(10)]
         [StrixRequired(AllowEmptyStrings = false)]
         public string Level { get; set; }
+
+        [StrixNotDefault]
+        public DateTime LogDateTime { get; set; }
 
         [AllowHtml]
         [StringLength(500)]
         [StrixRequired(AllowEmptyStrings = false)]
         public string Message { get; set; }
 
-        [StringLength(4000)]
-        public string Exception { get; set; }
-
-        [StringLength(40)]
-        public string IPAddress { get; set; }
+        [StringLength(10)]
+        public string Method { get; set; }
 
         [StringLength(250)]
         public string Url { get; set; }
@@ -62,16 +75,9 @@ namespace StrixIT.Platform.Modules.Logging
         [StringLength(100)]
         public string UserAgent { get; set; }
 
-        [StringLength(10)]
-        public string Method { get; set; }
+        [StringLength(250)]
+        public string UserEmail { get; set; }
 
-        [StringLength(50)]
-        public string ContentType { get; set; }
-
-        [StringLength(1000)]
-        public string Headers { get; set; }
-
-        [StringLength(1000)]
-        public string Cookies { get; set; }
+        #endregion Public Properties
     }
 }

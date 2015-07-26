@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="LoggingService.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,8 +17,11 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
+#endregion Apache License
+
+using log4net;
+using StrixIT.Platform.Core;
 using System;
 using System.Configuration;
 using System.IO;
@@ -27,8 +31,6 @@ using System.Web;
 using System.Web.Configuration;
 using System.Web.Helpers;
 using System.Web.Security;
-using log4net;
-using StrixIT.Platform.Core;
 
 namespace StrixIT.Platform.Modules.Logging
 {
@@ -37,18 +39,26 @@ namespace StrixIT.Platform.Modules.Logging
     /// </summary>
     public class LoggingService : ILoggingService
     {
-        private const string FILE = "File";
-        private const string ERROR = "Error";
-        private const string AUDIT = "Audit";
+        #region Private Fields
+
         private const string ANALYTICS = "Analytics";
-        private static bool _initialized = false;
+        private const string AUDIT = "Audit";
+        private const string ERROR = "Error";
+        private const string FILE = "File";
         private static string[] _frameworkCookieNames;
+
         private static string[] _headersToIgnore = new string[]
         {
             "cookie",
             "user-agent",
             "content-type"
         };
+
+        private static bool _initialized = false;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public LoggingService(ILoggingDataSource dataSource)
         {
@@ -65,6 +75,10 @@ namespace StrixIT.Platform.Modules.Logging
             }
         }
 
+        #endregion Public Constructors
+
+        #region Public Properties
+
         public string LogScriptErrorUrl
         {
             get
@@ -72,6 +86,10 @@ namespace StrixIT.Platform.Modules.Logging
                 return "Logging/ErrorLog/LogJavaScriptError";
             }
         }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         public void Log(string message, LogLevel level = LogLevel.Debug)
         {
@@ -83,23 +101,65 @@ namespace StrixIT.Platform.Modules.Logging
             Log(message, exception, level, FILE);
         }
 
-        public void LogToAudit(string entryType, string message)
-        {
-            SetCommonFields(entryType);
-            Log(message, null, LogLevel.Info, AUDIT);
-        }
-
         public void LogToAnalytics(string entryType, string data)
         {
             SetCommonFields(entryType);
             Log(data, null, LogLevel.Info, ANALYTICS);
         }
 
-        private static void SetCommonFields(string type)
+        public void LogToAudit(string entryType, string message)
         {
-            log4net.ThreadContext.Properties["groupId"] = StrixPlatform.User.GroupId;
-            log4net.ThreadContext.Properties["userName"] = StrixPlatform.User.Name;
-            log4net.ThreadContext.Properties["logType"] = type;
+            SetCommonFields(entryType);
+            Log(message, null, LogLevel.Info, AUDIT);
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private static void FillErrorProperties()
+        {
+            log4net.ThreadContext.Properties["userEmail"] = StrixPlatform.Environment.CurrentUserEmail;
+            var context = HttpContext.Current;
+
+            if (context != null)
+            {
+                var request = context.Request;
+                var url = request.Url.ToString();
+                StringBuilder headers = new StringBuilder();
+
+                foreach (var key in request.Headers.AllKeys.Where(k => !_headersToIgnore.Contains(k.ToLower())))
+                {
+                    if (headers.Length > 0)
+                    {
+                        headers.Append("\n");
+                    }
+
+                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : request.Headers[key];
+                    headers.Append(string.Format("{0}: {1}", key, value));
+                }
+
+                var cookies = new StringBuilder();
+
+                foreach (var key in request.Cookies.AllKeys)
+                {
+                    if (cookies.Length > 0)
+                    {
+                        cookies.Append("\n");
+                    }
+
+                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : request.Cookies[key].Value;
+                    cookies.Append(string.Format("{0}: {1}", key, value));
+                }
+
+                log4net.ThreadContext.Properties["ipAddress"] = request.UserHostAddress;
+                log4net.ThreadContext.Properties["url"] = url.Length < 250 ? url : url.Substring(0, 250);
+                log4net.ThreadContext.Properties["userAgent"] = request.UserAgent;
+                log4net.ThreadContext.Properties["method"] = request.HttpMethod;
+                log4net.ThreadContext.Properties["contentType"] = request.ContentType;
+                log4net.ThreadContext.Properties["headers"] = headers.ToString();
+                log4net.ThreadContext.Properties["cookies"] = cookies.ToString();
+            }
         }
 
         private static void Log(string message, Exception exception, LogLevel level, string target)
@@ -147,24 +207,28 @@ namespace StrixIT.Platform.Modules.Logging
                     }
 
                     break;
+
                 case LogLevel.Info:
                     {
                         logger.Info(message, exception);
                     }
 
                     break;
+
                 case LogLevel.Warning:
                     {
                         logger.Warn(message, exception);
                     }
 
                     break;
+
                 case LogLevel.Error:
                     {
                         logger.Error(message, exception);
                     }
 
                     break;
+
                 case LogLevel.Fatal:
                     {
                         logger.Fatal(message, exception);
@@ -185,6 +249,7 @@ namespace StrixIT.Platform.Modules.Logging
                         }
 
                         break;
+
                     case LogLevel.Fatal:
                         {
                             databaseLogger.Fatal(message, exception);
@@ -195,49 +260,13 @@ namespace StrixIT.Platform.Modules.Logging
             }
         }
 
-        private static void FillErrorProperties()
+        private static void SetCommonFields(string type)
         {
-            log4net.ThreadContext.Properties["userEmail"] = StrixPlatform.Environment.CurrentUserEmail;
-            var context = HttpContext.Current;
-
-            if (context != null)
-            {
-                var request = context.Request;
-                var url = request.Url.ToString();
-                StringBuilder headers = new StringBuilder();
-
-                foreach (var key in request.Headers.AllKeys.Where(k => !_headersToIgnore.Contains(k.ToLower())))
-                {
-                    if (headers.Length > 0)
-                    {
-                        headers.Append("\n");
-                    }
-
-                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : request.Headers[key];
-                    headers.Append(string.Format("{0}: {1}", key, value));
-                }
-
-                var cookies = new StringBuilder();
-
-                foreach (var key in request.Cookies.AllKeys)
-                {
-                    if (cookies.Length > 0)
-                    {
-                        cookies.Append("\n");
-                    }
-
-                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : request.Cookies[key].Value;
-                    cookies.Append(string.Format("{0}: {1}", key, value));
-                }
-
-                log4net.ThreadContext.Properties["ipAddress"] = request.UserHostAddress;
-                log4net.ThreadContext.Properties["url"] = url.Length < 250 ? url : url.Substring(0, 250);
-                log4net.ThreadContext.Properties["userAgent"] = request.UserAgent;
-                log4net.ThreadContext.Properties["method"] = request.HttpMethod;
-                log4net.ThreadContext.Properties["contentType"] = request.ContentType;
-                log4net.ThreadContext.Properties["headers"] = headers.ToString();
-                log4net.ThreadContext.Properties["cookies"] = cookies.ToString();
-            }
+            log4net.ThreadContext.Properties["groupId"] = StrixPlatform.User.GroupId;
+            log4net.ThreadContext.Properties["userName"] = StrixPlatform.User.Name;
+            log4net.ThreadContext.Properties["logType"] = type;
         }
+
+        #endregion Private Methods
     }
 }

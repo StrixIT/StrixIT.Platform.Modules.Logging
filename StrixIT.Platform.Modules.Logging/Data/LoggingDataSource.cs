@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="LoggingDataSource.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,17 +17,20 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
+#endregion Apache License
+
+using StrixIT.Platform.Core;
 using System;
 using System.Data.Entity;
 using System.Linq;
-using StrixIT.Platform.Core;
 
 namespace StrixIT.Platform.Modules.Logging
 {
     public class LoggingDataSource : EntityFrameworkDataSource, ILoggingDataSource
     {
+        #region Public Constructors
+
         public LoggingDataSource() : base(LoggingConstants.LOGGING)
         {
             this.Configuration.ValidateOnSaveEnabled = false;
@@ -34,15 +38,21 @@ namespace StrixIT.Platform.Modules.Logging
             this.Configuration.LazyLoadingEnabled = false;
         }
 
-        public DbSet<ErrorLogEntry> ErrorLog { get; set; }
+        #endregion Public Constructors
 
-        public DbSet<AuditLogEntry> AuditLog { get; set; }
+        #region Public Properties
 
         public DbSet<AnalyticsLogEntry> AnalyticsLog { get; set; }
+        public DbSet<AuditLogEntry> AuditLog { get; set; }
+        public DbSet<ErrorLogEntry> ErrorLog { get; set; }
 
-        public IQueryable<ErrorLogEntry> ErrorLogQuery()
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public IQueryable<AnalyticsLogEntry> AnalyticsLogQuery()
         {
-            return this.ErrorLog;
+            return this.AnalyticsLog;
         }
 
         public IQueryable<AuditLogEntry> AuditLogQuery()
@@ -50,9 +60,14 @@ namespace StrixIT.Platform.Modules.Logging
             return this.AuditLog;
         }
 
-        public IQueryable<AnalyticsLogEntry> AnalyticsLogQuery()
+        public IQueryable<ErrorLogEntry> ErrorLogQuery()
         {
-            return this.AnalyticsLog;
+            return this.ErrorLog;
+        }
+
+        public AuditLogEntry GetAuditLogEntry(long id)
+        {
+            return this.AuditLog.FirstOrDefault(l => l.Id == id);
         }
 
         public ErrorLogEntry GetErrorLogEntry(long id)
@@ -60,10 +75,9 @@ namespace StrixIT.Platform.Modules.Logging
             return this.ErrorLog.FirstOrDefault(l => l.Id == id);
         }
 
-        public AuditLogEntry GetAuditLogEntry(long id)
-        {
-            return this.AuditLog.FirstOrDefault(l => l.Id == id);
-        }
+        #endregion Public Methods
+
+        #region Protected Methods
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -76,5 +90,7 @@ namespace StrixIT.Platform.Modules.Logging
             modelBuilder.Entity<AuditLogEntry>().ToTable("AuditLog");
             modelBuilder.Entity<AnalyticsLogEntry>().ToTable("AnalyticsLog");
         }
+
+        #endregion Protected Methods
     }
 }

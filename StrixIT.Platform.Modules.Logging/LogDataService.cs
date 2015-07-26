@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="LogDataService.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,36 +17,35 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
-using System.Collections.Generic;
-using System.Linq;
+#endregion Apache License
+
 using log4net;
 using log4net.Appender;
 using StrixIT.Platform.Core;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace StrixIT.Platform.Modules.Logging
 {
     public class LogDataService : ILogDataService
     {
+        #region Private Fields
+
         private ILoggingDataSource _dataSource;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public LogDataService(ILoggingDataSource dataSource)
         {
             this._dataSource = dataSource;
         }
 
-        public IList<ErrorLogListModel> ErrorLogEntries(FilterOptions filter)
-        {
-            FlushAppender("ErrorLog");
-            SetDefaultSort(filter);
-            var results = this._dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
-            results.ForEach(r => 
-                {
-                    r.Message = GetMessageText(Web.Helpers.HtmlDecode(r.Message));
-                });
-            return results;
-        }
+        #endregion Public Constructors
+
+        #region Public Methods
 
         public IList<AuditLogListModel> AuditLogEntries(FilterOptions filter)
         {
@@ -54,9 +54,16 @@ namespace StrixIT.Platform.Modules.Logging
             return this._dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == StrixPlatform.User.GroupId).Filter(filter).Map<AuditLogListModel>().ToList();
         }
 
-        public ErrorLogEntry GetErrorLogEntry(long id)
+        public IList<ErrorLogListModel> ErrorLogEntries(FilterOptions filter)
         {
-            return this._dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).FirstOrDefault(e => e.Id == id);
+            FlushAppender("ErrorLog");
+            SetDefaultSort(filter);
+            var results = this._dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
+            results.ForEach(r =>
+                {
+                    r.Message = GetMessageText(Web.Helpers.HtmlDecode(r.Message));
+                });
+            return results;
         }
 
         public AuditLogEntry GetAuditLogEntry(long id)
@@ -64,13 +71,14 @@ namespace StrixIT.Platform.Modules.Logging
             return this._dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == StrixPlatform.User.GroupId).FirstOrDefault(a => a.Id == id);
         }
 
-        private static void SetDefaultSort(FilterOptions options)
+        public ErrorLogEntry GetErrorLogEntry(long id)
         {
-            if (options.Sort.IsEmpty())
-            {
-                options.Sort.Add(new SortField { Field = "LogDateTime", Dir = "desc" });
-            }
+            return this._dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).FirstOrDefault(e => e.Id == id);
         }
+
+        #endregion Public Methods
+
+        #region Private Methods
 
         private static void FlushAppender(string appenderName)
         {
@@ -87,5 +95,15 @@ namespace StrixIT.Platform.Modules.Logging
         {
             return new JavaScriptException(message).GetMessage();
         }
+
+        private static void SetDefaultSort(FilterOptions options)
+        {
+            if (options.Sort.IsEmpty())
+            {
+                options.Sort.Add(new SortField { Field = "LogDateTime", Dir = "desc" });
+            }
+        }
+
+        #endregion Private Methods
     }
 }

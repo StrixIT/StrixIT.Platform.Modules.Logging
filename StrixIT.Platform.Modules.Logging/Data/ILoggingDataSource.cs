@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="ILoggingDataSource.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,9 +17,9 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
-using System;
+#endregion Apache License
+
 using System.Linq;
 
 namespace StrixIT.Platform.Modules.Logging
@@ -28,14 +29,18 @@ namespace StrixIT.Platform.Modules.Logging
     /// </summary>
     public interface ILoggingDataSource
     {
-        IQueryable<ErrorLogEntry> ErrorLogQuery();
-
-        IQueryable<AuditLogEntry> AuditLogQuery();
+        #region Public Methods
 
         IQueryable<AnalyticsLogEntry> AnalyticsLogQuery();
 
-        ErrorLogEntry GetErrorLogEntry(long id);
+        IQueryable<AuditLogEntry> AuditLogQuery();
+
+        IQueryable<ErrorLogEntry> ErrorLogQuery();
 
         AuditLogEntry GetAuditLogEntry(long id);
+
+        ErrorLogEntry GetErrorLogEntry(long id);
+
+        #endregion Public Methods
     }
 }

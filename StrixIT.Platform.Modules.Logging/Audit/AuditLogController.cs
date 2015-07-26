@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="AuditLogController.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,23 +17,44 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
 
-using System;
-using System.Web.Mvc;
-using StrixIT.Platform.Web;
+#endregion Apache License
+
 using StrixIT.Platform.Core;
+using StrixIT.Platform.Web;
+using System.Web.Mvc;
 
 namespace StrixIT.Platform.Modules.Logging
 {
     [StrixAuthorization(Permissions = LoggingPermissions.ViewAuditLog)]
     public class AuditLogController : BaseController
     {
+        #region Private Fields
+
         private ILogDataService _dataService;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public AuditLogController(ILogDataService dataService)
         {
             this._dataService = dataService;
+        }
+
+        #endregion Public Constructors
+
+        #region Public Methods
+
+        public ActionResult Details()
+        {
+            return this.View();
+        }
+
+        [HttpPost]
+        public JsonResult Get(long id)
+        {
+            return this.Json(this._dataService.GetAuditLogEntry(id));
         }
 
         public ActionResult Index()
@@ -51,15 +73,6 @@ namespace StrixIT.Platform.Modules.Logging
             return this.Json(entries.DataRecords(options));
         }
 
-        public ActionResult Details()
-        {
-            return this.View();
-        }
-
-        [HttpPost]
-        public JsonResult Get(long id)
-        {
-            return this.Json(this._dataService.GetAuditLogEntry(id));
-        }
+        #endregion Public Methods
     }
 }

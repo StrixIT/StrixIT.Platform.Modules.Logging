@@ -1,4 +1,5 @@
 ﻿#region Apache License
+
 //-----------------------------------------------------------------------
 // <copyright file="ErrorLogListModel.cs" company="StrixIT">
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
@@ -16,7 +17,8 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-#endregion
+
+#endregion Apache License
 
 using System;
 
@@ -24,14 +26,14 @@ namespace StrixIT.Platform.Modules.Logging
 {
     public class ErrorLogListModel
     {
-        public long Id { get; set; }
+        #region Public Properties
 
         public string ExceptionType { get; set; }
-
+        public long Id { get; set; }
+        public DateTime LogDateTime { get; set; }
+        public string Message { get; set; }
         public string UserEmail { get; set; }
 
-        public DateTime LogDateTime { get; set; }
-
-        public string Message { get; set; }
+        #endregion Public Properties
     }
 }
