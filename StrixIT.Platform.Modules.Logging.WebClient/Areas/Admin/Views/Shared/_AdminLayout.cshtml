@@ -40,7 +40,7 @@
     <header>
         <a href="@adminLink" class="pull-left" title="@Interface.StrixCms"><img src="~/Styles/Images/StrixIT_logo.png" /></a>
         <ul id="adminmenu" kendo-menu k-orientation="'horizontal'" style="display: none; min-width: 150px;" class="pull-right" ng-cloak>
-            @if (StrixPlatform.User.HasPermission(PlatformPermissions.ViewAdminDashboard))
+            @if (User.HasPermission(PlatformPermissions.ViewAdminDashboard))
             {
                 <li><a href="@adminLink">@Interface.AdminDashboardTitle</a></li>
             }

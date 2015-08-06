@@ -16,6 +16,8 @@ namespace StrixIT.Platform.Modules.Logging.Tests
     {
         #region Public Methods
 
+        private IUserContext _user;
+
         [TestInitialize]
         public void Init()
         {
@@ -23,7 +25,7 @@ namespace StrixIT.Platform.Modules.Logging.Tests
             StrixPlatform.ApplicationId = Guid.NewGuid();
             var userContext = new Mock<IUserContext>();
             userContext.Setup(u => u.GroupId).Returns(Guid.NewGuid());
-            StrixPlatform.User = userContext.Object;
+            _user = userContext.Object;
             ModuleManager.LoadConfigurations();
         }
 
@@ -31,7 +33,6 @@ namespace StrixIT.Platform.Modules.Logging.Tests
         public void Tierdown()
         {
             StrixPlatform.ApplicationId = Guid.Empty;
-            StrixPlatform.User = null;
         }
 
         [TestMethod]
@@ -40,7 +41,7 @@ namespace StrixIT.Platform.Modules.Logging.Tests
             using (var source = new TestLoggingSource())
             {
                 var before = source.AnalyticsLogQuery().Count();
-                var loggingService = new LoggingService(source);
+                var loggingService = new LoggingService(source, _user);
                 loggingService.LogToAnalytics("Test", "AnalyticsTest");
                 var after = source.AnalyticsLogQuery().Count();
                 Assert.IsTrue(after == before + 1);
@@ -53,7 +54,7 @@ namespace StrixIT.Platform.Modules.Logging.Tests
             using (var source = new TestLoggingSource())
             {
                 var before = source.AuditLogQuery().Count();
-                var loggingService = new LoggingService(source);
+                var loggingService = new LoggingService(source, _user);
                 loggingService.LogToAudit("Test", "AuditTest");
                 var after = source.AuditLogQuery().Count();
                 Assert.IsTrue(after == before + 1);
@@ -66,7 +67,7 @@ namespace StrixIT.Platform.Modules.Logging.Tests
             using (var source = new TestLoggingSource())
             {
                 var before = source.ErrorLogQuery().Count();
-                var loggingService = new LoggingService(source);
+                var loggingService = new LoggingService(source, _user);
                 loggingService.Log("Test", LogLevel.Error);
                 var after = source.ErrorLogQuery().Count();
                 Assert.IsTrue(after == before + 1);

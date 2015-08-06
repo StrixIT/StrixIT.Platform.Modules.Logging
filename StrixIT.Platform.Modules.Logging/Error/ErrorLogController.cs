@@ -59,7 +59,8 @@ namespace StrixIT.Platform.Modules.Logging
 
         public ActionResult Index()
         {
-            var config = new ListConfiguration(typeof(ErrorLogListModel), new string[] { "ExceptionType", "UserEmail" });
+            var properties = DependencyInjector.TryGet<IMembershipService>() != null ? new string[] { "ExceptionType", "UserEmail" } : new string[] { "ExceptionType" };
+            var config = new ListConfiguration(typeof(ErrorLogListModel), properties);
             config.Fields.Insert(0, new ListFieldConfiguration("LogDateTime", "kendoDateTime") { ShowFilter = false });
             config.Fields.Add(new ListFieldConfiguration("Message") { DisplayHtml = true });
             config.HideNameColumn = true;

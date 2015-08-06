@@ -56,12 +56,16 @@ namespace StrixIT.Platform.Modules.Logging
 
         private static bool _initialized = false;
 
+        private IUserContext _user;
+
         #endregion Private Fields
 
         #region Public Constructors
 
-        public LoggingService(ILoggingDataSource dataSource)
+        public LoggingService(ILoggingDataSource dataSource, IUserContext user)
         {
+            _user = user;
+
             if (!_initialized)
             {
                 dataSource.ErrorLogQuery().Any();
@@ -119,7 +123,7 @@ namespace StrixIT.Platform.Modules.Logging
 
         private static void FillErrorProperties()
         {
-            log4net.ThreadContext.Properties["userEmail"] = StrixPlatform.Environment.CurrentUserEmail;
+            ThreadContext.Properties["userEmail"] = StrixPlatform.Environment.CurrentUserEmail;
             var context = HttpContext.Current;
 
             if (context != null)
@@ -152,17 +156,17 @@ namespace StrixIT.Platform.Modules.Logging
                     cookies.Append(string.Format("{0}: {1}", key, value));
                 }
 
-                log4net.ThreadContext.Properties["ipAddress"] = request.UserHostAddress;
-                log4net.ThreadContext.Properties["url"] = url.Length < 250 ? url : url.Substring(0, 250);
-                log4net.ThreadContext.Properties["userAgent"] = request.UserAgent;
-                log4net.ThreadContext.Properties["method"] = request.HttpMethod;
-                log4net.ThreadContext.Properties["contentType"] = request.ContentType;
-                log4net.ThreadContext.Properties["headers"] = headers.ToString();
-                log4net.ThreadContext.Properties["cookies"] = cookies.ToString();
+                ThreadContext.Properties["ipAddress"] = request.UserHostAddress;
+                ThreadContext.Properties["url"] = url.Length < 250 ? url : url.Substring(0, 250);
+                ThreadContext.Properties["userAgent"] = request.UserAgent;
+                ThreadContext.Properties["method"] = request.HttpMethod;
+                ThreadContext.Properties["contentType"] = request.ContentType;
+                ThreadContext.Properties["headers"] = headers.ToString();
+                ThreadContext.Properties["cookies"] = cookies.ToString();
             }
         }
 
-        private static void Log(string message, Exception exception, LogLevel level, string target)
+        private void Log(string message, Exception exception, LogLevel level, string target)
         {
             ILog logger = logger = LogManager.GetLogger(target + "Logger");
 
@@ -173,8 +177,8 @@ namespace StrixIT.Platform.Modules.Logging
 
             if (target != FILE || level == LogLevel.Error || level == LogLevel.Fatal)
             {
-                log4net.ThreadContext.Properties["applicationId"] = StrixPlatform.ApplicationId;
-                log4net.ThreadContext.Properties["userId"] = StrixPlatform.User.Id;
+                ThreadContext.Properties["applicationId"] = StrixPlatform.ApplicationId;
+                ThreadContext.Properties["userId"] = _user.Id;
             }
 
             if (level == LogLevel.Error || level == LogLevel.Fatal)
@@ -193,7 +197,7 @@ namespace StrixIT.Platform.Modules.Logging
                         message = string.Format("{0} Inner exception message: {1}", message, exception.InnerException.Message);
                     }
 
-                    log4net.ThreadContext.Properties["exceptionType"] = exceptionType.Name;
+                    ThreadContext.Properties["exceptionType"] = exceptionType.Name;
                 }
 
                 FillErrorProperties();
@@ -260,11 +264,11 @@ namespace StrixIT.Platform.Modules.Logging
             }
         }
 
-        private static void SetCommonFields(string type)
+        private void SetCommonFields(string type)
         {
-            log4net.ThreadContext.Properties["groupId"] = StrixPlatform.User.GroupId;
-            log4net.ThreadContext.Properties["userName"] = StrixPlatform.User.Name;
-            log4net.ThreadContext.Properties["logType"] = type;
+            ThreadContext.Properties["groupId"] = _user.GroupId;
+            ThreadContext.Properties["userName"] = _user.Name;
+            ThreadContext.Properties["logType"] = type;
         }
 
         #endregion Private Methods

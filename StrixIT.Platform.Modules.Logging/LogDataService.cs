@@ -5,7 +5,7 @@
 // Copyright 2015 StrixIT. Author R.G. Schurgers MA MSc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
+// you may not use file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
@@ -34,13 +34,16 @@ namespace StrixIT.Platform.Modules.Logging
 
         private ILoggingDataSource _dataSource;
 
+        private IUserContext _user;
+
         #endregion Private Fields
 
         #region Public Constructors
 
-        public LogDataService(ILoggingDataSource dataSource)
+        public LogDataService(ILoggingDataSource dataSource, IUserContext user)
         {
-            this._dataSource = dataSource;
+            _dataSource = dataSource;
+            _user = user;
         }
 
         #endregion Public Constructors
@@ -51,14 +54,14 @@ namespace StrixIT.Platform.Modules.Logging
         {
             FlushAppender("AuditLog");
             SetDefaultSort(filter);
-            return this._dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == StrixPlatform.User.GroupId).Filter(filter).Map<AuditLogListModel>().ToList();
+            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == _user.GroupId).Filter(filter).Map<AuditLogListModel>().ToList();
         }
 
         public IList<ErrorLogListModel> ErrorLogEntries(FilterOptions filter)
         {
             FlushAppender("ErrorLog");
             SetDefaultSort(filter);
-            var results = this._dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
+            var results = _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
             results.ForEach(r =>
                 {
                     r.Message = GetMessageText(Web.Helpers.HtmlDecode(r.Message));
@@ -68,12 +71,12 @@ namespace StrixIT.Platform.Modules.Logging
 
         public AuditLogEntry GetAuditLogEntry(long id)
         {
-            return this._dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == StrixPlatform.User.GroupId).FirstOrDefault(a => a.Id == id);
+            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == _user.GroupId).FirstOrDefault(a => a.Id == id);
         }
 
         public ErrorLogEntry GetErrorLogEntry(long id)
         {
-            return this._dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).FirstOrDefault(e => e.Id == id);
+            return _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).FirstOrDefault(e => e.Id == id);
         }
 
         #endregion Public Methods

@@ -18,6 +18,7 @@
 
 @{
     Layout = "~/Areas/Admin/Views/Shared/_ItemLayout.cshtml";
+    var membershipActive = DependencyInjector.TryGet<IMembershipService>() != null;
 }
 <div ng-controller="logcontroller">
     <h2>@Interface.ErrorLogEntry</h2>
@@ -42,10 +43,13 @@
                     <td>@Interface.LogDateTime</td>
                     <td>{{ errorlog.logDateTime | kendoDateTime }}</td>
                 </tr>
-                <tr>
-                    <td>@Interface.UserEmail</td>
-                    <td>{{ errorlog.userEmail }}</td>
-                </tr>
+                @if (membershipActive)
+                {
+                    <tr>
+                        <td>@Interface.UserEmail</td>
+                        <td>{{ errorlog.userEmail }}</td>
+                    </tr>
+                }
                 <tr>
                     <td>@Interface.Level</td>
                     <td>{{ errorlog.level }}</td>
