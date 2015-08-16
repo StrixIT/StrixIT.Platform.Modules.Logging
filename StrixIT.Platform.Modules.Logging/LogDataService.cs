@@ -23,6 +23,8 @@
 using log4net;
 using log4net.Appender;
 using StrixIT.Platform.Core;
+using StrixIT.Platform.Core.Environment;
+using StrixIT.Platform.Web;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,16 +36,18 @@ namespace StrixIT.Platform.Modules.Logging
 
         private ILoggingDataSource _dataSource;
 
+        private IMembershipSettings _membershipSettings;
         private IUserContext _user;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public LogDataService(ILoggingDataSource dataSource, IUserContext user)
+        public LogDataService(ILoggingDataSource dataSource, IUserContext user, IMembershipSettings membershipSettings)
         {
             _dataSource = dataSource;
             _user = user;
+            _membershipSettings = membershipSettings;
         }
 
         #endregion Public Constructors
@@ -54,29 +58,29 @@ namespace StrixIT.Platform.Modules.Logging
         {
             FlushAppender("AuditLog");
             SetDefaultSort(filter);
-            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == _user.GroupId).Filter(filter).Map<AuditLogListModel>().ToList();
+            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == _membershipSettings.ApplicationId && a.GroupId == _user.GroupId).Filter(filter).Map<AuditLogListModel>().ToList();
         }
 
         public IList<ErrorLogListModel> ErrorLogEntries(FilterOptions filter)
         {
             FlushAppender("ErrorLog");
             SetDefaultSort(filter);
-            var results = _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
+            var results = _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == _membershipSettings.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
             results.ForEach(r =>
                 {
-                    r.Message = GetMessageText(Web.Helpers.HtmlDecode(r.Message));
+                    r.Message = GetMessageText(HtmlHelpers.HtmlDecode(r.Message));
                 });
             return results;
         }
 
         public AuditLogEntry GetAuditLogEntry(long id)
         {
-            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == StrixPlatform.ApplicationId && a.GroupId == _user.GroupId).FirstOrDefault(a => a.Id == id);
+            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == _membershipSettings.ApplicationId && a.GroupId == _user.GroupId).FirstOrDefault(a => a.Id == id);
         }
 
         public ErrorLogEntry GetErrorLogEntry(long id)
         {
-            return _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == StrixPlatform.ApplicationId).FirstOrDefault(e => e.Id == id);
+            return _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == _membershipSettings.ApplicationId).FirstOrDefault(e => e.Id == id);
         }
 
         #endregion Public Methods

@@ -6,7 +6,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using StrixIT.Platform.Core;
+using StrixIT.Platform.Core.Environment;
+using StrixIT.Platform.Framework;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace StrixIT.Platform.Modules.Logging.Tests
@@ -16,32 +19,13 @@ namespace StrixIT.Platform.Modules.Logging.Tests
     {
         #region Public Methods
 
-        private IUserContext _user;
-
-        [TestInitialize]
-        public void Init()
-        {
-            StrixPlatform.Environment = new DefaultEnvironment();
-            StrixPlatform.ApplicationId = Guid.NewGuid();
-            var userContext = new Mock<IUserContext>();
-            userContext.Setup(u => u.GroupId).Returns(Guid.NewGuid());
-            _user = userContext.Object;
-            ModuleManager.LoadConfigurations();
-        }
-
-        [TestCleanup]
-        public void Tierdown()
-        {
-            StrixPlatform.ApplicationId = Guid.Empty;
-        }
-
         [TestMethod]
         public void WritingAnAnalyticsMessageToTheDatabaseShouldStoreAnAnalyticsMessage()
         {
-            using (var source = new TestLoggingSource())
+            using (var source = new TestLoggingSource(new Configuration()))
             {
                 var before = source.AnalyticsLogQuery().Count();
-                var loggingService = new LoggingService(source, _user);
+                var loggingService = GetLoggingService(source);
                 loggingService.LogToAnalytics("Test", "AnalyticsTest");
                 var after = source.AnalyticsLogQuery().Count();
                 Assert.IsTrue(after == before + 1);
@@ -51,10 +35,10 @@ namespace StrixIT.Platform.Modules.Logging.Tests
         [TestMethod]
         public void WritingAnAuditMessageToTheDatabaseShouldStoreAnAuditMessage()
         {
-            using (var source = new TestLoggingSource())
+            using (var source = new TestLoggingSource(new Configuration()))
             {
                 var before = source.AuditLogQuery().Count();
-                var loggingService = new LoggingService(source, _user);
+                var loggingService = GetLoggingService(source);
                 loggingService.LogToAudit("Test", "AuditTest");
                 var after = source.AuditLogQuery().Count();
                 Assert.IsTrue(after == before + 1);
@@ -64,10 +48,10 @@ namespace StrixIT.Platform.Modules.Logging.Tests
         [TestMethod]
         public void WritingAnErrorMessageToTheDatabaseShouldStoreAnErrorMessage()
         {
-            using (var source = new TestLoggingSource())
+            using (var source = new TestLoggingSource(new Configuration()))
             {
                 var before = source.ErrorLogQuery().Count();
-                var loggingService = new LoggingService(source, _user);
+                var loggingService = GetLoggingService(source);
                 loggingService.Log("Test", LogLevel.Error);
                 var after = source.ErrorLogQuery().Count();
                 Assert.IsTrue(after == before + 1);
@@ -75,5 +59,20 @@ namespace StrixIT.Platform.Modules.Logging.Tests
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private LoggingService GetLoggingService(TestLoggingSource source)
+        {
+            var environmentMock = new Mock<IEnvironment>();
+            var membershipSettingsMock = new Mock<IMembershipSettings>();
+            var userContextMock = new Mock<IUserContext>();
+            userContextMock.Setup(u => u.GroupId).Returns(Guid.NewGuid());
+            environmentMock.Setup(e => e.User).Returns(userContextMock.Object);
+            environmentMock.Setup(e => e.MapPath(It.IsAny<string>())).Returns<string>(x => Path.Combine(Helpers.GetWorkingDirectory(), x));
+            return new LoggingService(source, membershipSettingsMock.Object, environmentMock.Object);
+        }
+
+        #endregion Private Methods
     }
 }

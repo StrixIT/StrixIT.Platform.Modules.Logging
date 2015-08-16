@@ -42,6 +42,9 @@
     <Reference Include="StrixIT.Platform.Core">
       <HintPath>..\StrixIT.Platform.Modules.Logging.WebClient\Libraries\StrixIT.Platform.Core.dll</HintPath>
     </Reference>
+    <Reference Include="StrixIT.Platform.Framework">
+      <HintPath>..\StrixIT.Platform.Modules.Logging.WebClient\Libraries\StrixIT.Platform.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="StrixIT.Platform.Web">
       <HintPath>..\StrixIT.Platform.Modules.Logging.WebClient\Libraries\StrixIT.Platform.Web.dll</HintPath>
     </Reference>

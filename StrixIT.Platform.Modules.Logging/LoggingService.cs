@@ -22,6 +22,7 @@
 
 using log4net;
 using StrixIT.Platform.Core;
+using StrixIT.Platform.Core.Environment;
 using System;
 using System.Configuration;
 using System.IO;
@@ -56,20 +57,22 @@ namespace StrixIT.Platform.Modules.Logging
 
         private static bool _initialized = false;
 
+        private IMembershipSettings _membershipSettings;
         private IUserContext _user;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public LoggingService(ILoggingDataSource dataSource, IUserContext user)
+        public LoggingService(ILoggingDataSource dataSource, IMembershipSettings membershipSettings, IEnvironment environment)
         {
-            _user = user;
+            _user = environment.User;
+            _membershipSettings = membershipSettings;
 
             if (!_initialized)
             {
                 dataSource.ErrorLogQuery().Any();
-                var configPath = StrixPlatform.Environment.MapPath("Areas/Logging/web.config");
+                var configPath = environment.MapPath("Areas/Logging/web.config");
                 log4net.Config.XmlConfigurator.Configure(new FileInfo(configPath));
 
                 SessionStateSection sessionStateSection = (SessionStateSection)ConfigurationManager.GetSection("system.web/sessionState");
@@ -121,9 +124,9 @@ namespace StrixIT.Platform.Modules.Logging
 
         #region Private Methods
 
-        private static void FillErrorProperties()
+        private void FillErrorProperties()
         {
-            ThreadContext.Properties["userEmail"] = StrixPlatform.Environment.CurrentUserEmail;
+            ThreadContext.Properties["userEmail"] = _user.Email;
             var context = HttpContext.Current;
 
             if (context != null)
@@ -177,7 +180,7 @@ namespace StrixIT.Platform.Modules.Logging
 
             if (target != FILE || level == LogLevel.Error || level == LogLevel.Fatal)
             {
-                ThreadContext.Properties["applicationId"] = StrixPlatform.ApplicationId;
+                ThreadContext.Properties["applicationId"] = _membershipSettings.ApplicationId;
                 ThreadContext.Properties["userId"] = _user.Id;
             }
 

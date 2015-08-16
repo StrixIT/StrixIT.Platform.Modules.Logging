@@ -37,7 +37,7 @@ namespace StrixIT.Platform.Modules.Logging
 
         #region Public Constructors
 
-        public ErrorLogController(ILogDataService dataService)
+        public ErrorLogController(IEnvironment environment, ILogDataService dataService) : base(environment)
         {
             this._dataService = dataService;
         }
@@ -80,7 +80,7 @@ namespace StrixIT.Platform.Modules.Logging
         [AllowAnonymous]
         public void LogJavaScriptError(ErrorLogEntry entry)
         {
-            var message = Web.Helpers.HtmlEncode(entry.Message);
+            var message = HtmlHelpers.HtmlEncode(entry.Message);
             var exception = new JavaScriptException(message);
             Logger.Log(exception.Message, exception, LogLevel.Error);
         }

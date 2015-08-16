@@ -37,7 +37,7 @@ namespace StrixIT.Platform.Modules.Logging
 
         #region Public Constructors
 
-        public AuditLogController(ILogDataService dataService)
+        public AuditLogController(IEnvironment environment, ILogDataService dataService) : base(environment)
         {
             this._dataService = dataService;
         }

@@ -21,6 +21,7 @@
 #endregion Apache License
 
 using StrixIT.Platform.Core;
+using StrixIT.Platform.Framework;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace StrixIT.Platform.Modules.Logging
     {
         #region Public Constructors
 
-        public LoggingDataSource() : base(LoggingConstants.LOGGING)
+        public LoggingDataSource(IConfiguration config) : base(config, LoggingConstants.LOGGING)
         {
             this.Configuration.ValidateOnSaveEnabled = false;
             this.Configuration.ProxyCreationEnabled = false;
