@@ -21,6 +21,8 @@
 #endregion Apache License
 
 using StrixIT.Platform.Core;
+using StrixIT.Platform.Core.Environment;
+using System;
 using System.Collections.Generic;
 
 namespace StrixIT.Platform.Modules.Logging
@@ -29,9 +31,21 @@ namespace StrixIT.Platform.Modules.Logging
     {
         #region Private Fields
 
-        private static bool _membershipPresent = DependencyInjector.TryGet<IMembershipService>() != null;
+        private static bool? _membershipPresent;
 
         #endregion Private Fields
+
+        #region Public Constructors
+
+        public LoggingModuleConfiguration(IMembershipSettings membershipSettings)
+        {
+            if (!_membershipPresent.HasValue)
+            {
+                _membershipPresent = membershipSettings.ApplicationId != Guid.Empty;
+            }
+        }
+
+        #endregion Public Constructors
 
         #region Public Properties
 
@@ -42,7 +56,7 @@ namespace StrixIT.Platform.Modules.Logging
                 var list = new List<ModuleLink>();
                 list.Add(new ModuleLink(Resources.Interface.ErrorLogTitle, LoggingPermissions.ViewErrorLog, "ErrorLog"));
 
-                if (_membershipPresent)
+                if (_membershipPresent.Value)
                 {
                     list.Add(new ModuleLink(Resources.Interface.AuditLogTitle, LoggingPermissions.ViewAuditLog, "AuditLog"));
                 }
