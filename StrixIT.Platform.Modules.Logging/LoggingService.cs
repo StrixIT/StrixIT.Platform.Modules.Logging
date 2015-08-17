@@ -22,7 +22,6 @@
 
 using log4net;
 using StrixIT.Platform.Core;
-using StrixIT.Platform.Core.Environment;
 using System;
 using System.Configuration;
 using System.IO;
@@ -57,17 +56,18 @@ namespace StrixIT.Platform.Modules.Logging
 
         private static bool _initialized = false;
 
-        private IMembershipSettings _membershipSettings;
-        private IUserContext _user;
+        private IEnvironment _environment;
+
+        private HttpRequestBase _httpRequest;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public LoggingService(ILoggingDataSource dataSource, IMembershipSettings membershipSettings, IEnvironment environment)
+        public LoggingService(ILoggingDataSource dataSource, IEnvironment environment, HttpRequestBase httpRequest)
         {
-            _user = environment.User;
-            _membershipSettings = membershipSettings;
+            _environment = environment;
+            _httpRequest = httpRequest;
 
             if (!_initialized)
             {
@@ -111,6 +111,7 @@ namespace StrixIT.Platform.Modules.Logging
         public void LogToAnalytics(string entryType, string data)
         {
             SetCommonFields(entryType);
+            SetUserIP();
             Log(data, null, LogLevel.Info, ANALYTICS);
         }
 
@@ -126,44 +127,42 @@ namespace StrixIT.Platform.Modules.Logging
 
         private void FillErrorProperties()
         {
-            ThreadContext.Properties["userEmail"] = _user.Email;
-            var context = HttpContext.Current;
+            ThreadContext.Properties["userEmail"] = _environment.User.Email;
 
-            if (context != null)
+            if (_httpRequest != null)
             {
-                var request = context.Request;
-                var url = request.Url.ToString();
+                var url = _httpRequest.Url.ToString();
                 StringBuilder headers = new StringBuilder();
 
-                foreach (var key in request.Headers.AllKeys.Where(k => !_headersToIgnore.Contains(k.ToLower())))
+                foreach (var key in _httpRequest.Headers.AllKeys.Where(k => !_headersToIgnore.Contains(k.ToLower())))
                 {
                     if (headers.Length > 0)
                     {
                         headers.Append("\n");
                     }
 
-                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : request.Headers[key];
+                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : _httpRequest.Headers[key];
                     headers.Append(string.Format("{0}: {1}", key, value));
                 }
 
                 var cookies = new StringBuilder();
 
-                foreach (var key in request.Cookies.AllKeys)
+                foreach (var key in _httpRequest.Cookies.AllKeys)
                 {
                     if (cookies.Length > 0)
                     {
                         cookies.Append("\n");
                     }
 
-                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : request.Cookies[key].Value;
+                    var value = _frameworkCookieNames.Contains(key.ToLower()) ? "Present" : _httpRequest.Cookies[key].Value;
                     cookies.Append(string.Format("{0}: {1}", key, value));
                 }
 
-                ThreadContext.Properties["ipAddress"] = request.UserHostAddress;
+                ThreadContext.Properties["ipAddress"] = _httpRequest.UserHostAddress;
                 ThreadContext.Properties["url"] = url.Length < 250 ? url : url.Substring(0, 250);
-                ThreadContext.Properties["userAgent"] = request.UserAgent;
-                ThreadContext.Properties["method"] = request.HttpMethod;
-                ThreadContext.Properties["contentType"] = request.ContentType;
+                ThreadContext.Properties["userAgent"] = _httpRequest.UserAgent;
+                ThreadContext.Properties["method"] = _httpRequest.HttpMethod;
+                ThreadContext.Properties["contentType"] = _httpRequest.ContentType;
                 ThreadContext.Properties["headers"] = headers.ToString();
                 ThreadContext.Properties["cookies"] = cookies.ToString();
             }
@@ -180,8 +179,8 @@ namespace StrixIT.Platform.Modules.Logging
 
             if (target != FILE || level == LogLevel.Error || level == LogLevel.Fatal)
             {
-                ThreadContext.Properties["applicationId"] = _membershipSettings.ApplicationId;
-                ThreadContext.Properties["userId"] = _user.Id;
+                ThreadContext.Properties["applicationId"] = _environment.Membership.ApplicationId;
+                ThreadContext.Properties["userId"] = _environment.User.Id;
             }
 
             if (level == LogLevel.Error || level == LogLevel.Fatal)
@@ -269,9 +268,29 @@ namespace StrixIT.Platform.Modules.Logging
 
         private void SetCommonFields(string type)
         {
-            ThreadContext.Properties["groupId"] = _user.GroupId;
-            ThreadContext.Properties["userName"] = _user.Name;
+            ThreadContext.Properties["groupId"] = _environment.User.GroupId;
+            ThreadContext.Properties["userName"] = _environment.User.Name;
             ThreadContext.Properties["logType"] = type;
+        }
+
+        private void SetUserIP()
+        {
+            if (_httpRequest != null)
+            {
+                string ipList = _httpRequest.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                string ipAddress;
+
+                if (!string.IsNullOrEmpty(ipList))
+                {
+                    ipAddress = ipList.Split(',')[0];
+                }
+                else
+                {
+                    ipAddress = _httpRequest.ServerVariables["REMOTE_ADDR"];
+                }
+
+                ThreadContext.Properties["ipAddress"] = ipAddress;
+            }
         }
 
         #endregion Private Methods

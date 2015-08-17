@@ -38,6 +38,9 @@ namespace StrixIT.Platform.Modules.Logging
 
         public long Id { get; set; }
 
+        [StringLength(50)]
+        public string IpAddress { get; set; }
+
         [StringLength(4000)]
         [StrixRequired]
         public string LogData { get; set; }

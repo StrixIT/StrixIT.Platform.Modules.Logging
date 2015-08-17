@@ -35,19 +35,16 @@ namespace StrixIT.Platform.Modules.Logging
         #region Private Fields
 
         private ILoggingDataSource _dataSource;
-
-        private IMembershipSettings _membershipSettings;
-        private IUserContext _user;
+        private IEnvironment _environment;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public LogDataService(ILoggingDataSource dataSource, IUserContext user, IMembershipSettings membershipSettings)
+        public LogDataService(ILoggingDataSource dataSource, IEnvironment environment)
         {
             _dataSource = dataSource;
-            _user = user;
-            _membershipSettings = membershipSettings;
+            _environment = environment;
         }
 
         #endregion Public Constructors
@@ -58,14 +55,14 @@ namespace StrixIT.Platform.Modules.Logging
         {
             FlushAppender("AuditLog");
             SetDefaultSort(filter);
-            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == _membershipSettings.ApplicationId && a.GroupId == _user.GroupId).Filter(filter).Map<AuditLogListModel>().ToList();
+            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == _environment.Membership.ApplicationId && a.GroupId == _environment.User.GroupId).Filter(filter).Map<AuditLogListModel>().ToList();
         }
 
         public IList<ErrorLogListModel> ErrorLogEntries(FilterOptions filter)
         {
             FlushAppender("ErrorLog");
             SetDefaultSort(filter);
-            var results = _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == _membershipSettings.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
+            var results = _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == _environment.Membership.ApplicationId).Filter(filter).Map<ErrorLogListModel>().ToList();
             results.ForEach(r =>
                 {
                     r.Message = GetMessageText(HtmlHelpers.HtmlDecode(r.Message));
@@ -75,12 +72,12 @@ namespace StrixIT.Platform.Modules.Logging
 
         public AuditLogEntry GetAuditLogEntry(long id)
         {
-            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == _membershipSettings.ApplicationId && a.GroupId == _user.GroupId).FirstOrDefault(a => a.Id == id);
+            return _dataSource.AuditLogQuery().Where(a => a.ApplicationId == _environment.Membership.ApplicationId && a.GroupId == _environment.User.GroupId).FirstOrDefault(a => a.Id == id);
         }
 
         public ErrorLogEntry GetErrorLogEntry(long id)
         {
-            return _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == _membershipSettings.ApplicationId).FirstOrDefault(e => e.Id == id);
+            return _dataSource.ErrorLogQuery().Where(e => e.ApplicationId == _environment.Membership.ApplicationId).FirstOrDefault(e => e.Id == id);
         }
 
         #endregion Public Methods

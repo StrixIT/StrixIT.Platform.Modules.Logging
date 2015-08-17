@@ -9,8 +9,10 @@ using StrixIT.Platform.Core;
 using StrixIT.Platform.Core.Environment;
 using StrixIT.Platform.Framework;
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Web;
 
 namespace StrixIT.Platform.Modules.Logging.Tests
 {
@@ -69,8 +71,9 @@ namespace StrixIT.Platform.Modules.Logging.Tests
             var userContextMock = new Mock<IUserContext>();
             userContextMock.Setup(u => u.GroupId).Returns(Guid.NewGuid());
             environmentMock.Setup(e => e.User).Returns(userContextMock.Object);
+            environmentMock.Setup(e => e.Membership).Returns(membershipSettingsMock.Object);
             environmentMock.Setup(e => e.MapPath(It.IsAny<string>())).Returns<string>(x => Path.Combine(Helpers.GetWorkingDirectory(), x));
-            return new LoggingService(source, membershipSettingsMock.Object, environmentMock.Object);
+            return new LoggingService(source, environmentMock.Object, null);
         }
 
         #endregion Private Methods
